@@ -1,13 +1,182 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Arc Bridge</title>
-    <meta name="description" content="Swap on Sepolia and bridge native USDC between Sepolia and Arc Testnet." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARC Bridge</title>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background:#070f1d;
+  color:white;
+}
+
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 30px;
+}
+
+.logo {
+  height:40px;
+}
+
+button {
+  background:linear-gradient(90deg,#344566,#8b8e95);
+  border:none;
+  padding:10px 15px;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.container {
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+
+.banner {
+  height:80px;
+  background:linear-gradient(90deg,#344566,#8b8e95);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:20px;
+}
+
+.box {
+  background:#0d1628;
+  padding:20px;
+  border-radius:16px;
+  margin-bottom:20px;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+}
+
+.footer {
+  text-align:center;
+  margin-top:40px;
+  opacity:0.7;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="logo.webp" class="logo">
+  <button onclick="connectWallet()" id="connectBtn">Conectar</button>
+</header>
+
+<div class="container">
+
+<div class="banner">
+  <strong>Bridge simples entre Sepolia ⇄ ARC</strong>
+</div>
+
+<!-- SWAP -->
+<div class="box">
+  <h3>Swap (Sepolia)</h3>
+  <p id="ethBalance">ETH: -</p>
+  <p id="usdcBalance">USDC: -</p>
+  
+  <button onclick="openUniswap()">Swap ETH → USDC</button>
+</div>
+
+<!-- BRIDGE -->
+<div class="box">
+  <h3>Bridge</h3>
+
+  <select id="fromNetwork">
+    <option value="sepolia">Sepolia</option>
+    <option value="arc">ARC</option>
+  </select>
+
+  <button onclick="invert()">🔄</button>
+
+  <select id="toNetwork">
+    <option value="arc">ARC</option>
+    <option value="sepolia">Sepolia</option>
+  </select>
+
+  <input id="amount" placeholder="Quantidade USDC">
+
+  <button onclick="bridge()">Bridge</button>
+</div>
+
+</div>
+
+<div class="footer">
+  Desenvolvido por @Rubensbrandao1
+</div>
+
+<script>
+let provider;
+let signer;
+let user;
+
+const USDC_SEPOLIA = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+
+async function connectWallet() {
+  if (!window.ethereum) return alert("Instale MetaMask");
+
+  provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  signer = await provider.getSigner();
+  user = await signer.getAddress();
+
+  document.getElementById("connectBtn").innerText = user.slice(0,6)+"...";
+
+  loadBalances();
+}
+
+async function loadBalances() {
+  const eth = await provider.getBalance(user);
+  document.getElementById("ethBalance").innerText = 
+    "ETH: " + ethers.formatEther(eth);
+
+  const usdc = new ethers.Contract(
+    USDC_SEPOLIA,
+    ["function balanceOf(address) view returns (uint256)"],
+    provider
+  );
+
+  const bal = await usdc.balanceOf(user);
+
+  document.getElementById("usdcBalance").innerText =
+    "USDC: " + (bal / 1e6).toFixed(2);
+}
+
+function invert() {
+  let from = document.getElementById("fromNetwork");
+  let to = document.getElementById("toNetwork");
+
+  let temp = from.value;
+  from.value = to.value;
+  to.value = temp;
+}
+
+function openUniswap() {
+  window.open("https://app.uniswap.org/#/swap?chain=sepolia");
+}
+
+async function bridge() {
+  alert("Bridge será integrada com Circle Kit depois 🚀");
+}
+</script>
+
+</body>
 </html>
