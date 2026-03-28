@@ -10,7 +10,7 @@
 <style>
 body {
   margin:0;
-  font-family:Arial;
+  font-family:Inter, Arial;
   background:#070f1d;
   color:white;
 }
@@ -20,55 +20,93 @@ header {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:15px 25px;
+  padding:20px 30px;
 }
 
 .logo { height:45px; }
 
-/* BOTÕES */
+/* NETWORK BADGE */
+.network {
+  font-size:14px;
+  opacity:0.8;
+}
+
+/* BUTTON */
 button {
   background:linear-gradient(90deg,#344566,#8b8e95);
   border:none;
-  padding:10px 16px;
-  color:white;
+  padding:12px 18px;
   border-radius:10px;
+  color:white;
   cursor:pointer;
+  transition:0.2s;
 }
 
-/* CONTAINER */
+button:hover {
+  transform:scale(1.05);
+  opacity:0.9;
+}
+
+/* MAIN */
 .container {
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
-  padding:15px;
+  padding:20px;
 }
 
-/* BANNER */
-.banner {
+/* TOP BANNER */
+.top-banner {
   height:70px;
-  border-radius:12px;
+  border-radius:14px;
   background:linear-gradient(90deg,#344566,#8b8e95);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:bold;
-  margin-bottom:15px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+/* HEADLINE */
+.headline {
+  text-align:center;
+  font-size:20px;
+  margin-bottom:20px;
+  opacity:0.9;
+}
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
 }
 
 /* BOX */
 .box {
   background:#0d1628;
-  border-radius:18px;
   padding:20px;
+  border-radius:18px;
+}
+
+/* SUB BANNER */
+.sub-banner {
+  height:50px;
+  border-radius:10px;
+  background:#111c33;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   margin-bottom:15px;
+  font-size:14px;
 }
 
 /* INPUT */
-input, select {
+input {
   width:100%;
   padding:12px;
+  margin-top:10px;
   border-radius:10px;
   border:none;
-  margin-top:10px;
   background:#111c33;
   color:white;
 }
@@ -76,7 +114,15 @@ input, select {
 /* INFO */
 .info {
   font-size:13px;
-  opacity:0.7;
+  opacity:0.6;
+  margin-top:8px;
+}
+
+/* INVERT */
+.invert {
+  text-align:center;
+  margin:10px 0;
+  cursor:pointer;
 }
 
 /* FOOTER */
@@ -92,53 +138,61 @@ input, select {
 
 <header>
   <img src="logo.webp" class="logo">
-  <button onclick="toggleWallet()" id="connectBtn">Conectar</button>
+  <div class="network" id="network">Rede: -</div>
+  <button onclick="connect()" id="btn">Conectar</button>
 </header>
 
 <div class="container">
 
-<div class="banner">
-  Seamless Bridge • Sepolia ⇄ ARC • Powered by USDC
+<div class="top-banner">
+  Conectando Sepolia ⇄ ARC Testnet sem limites
 </div>
+
+<div class="headline">
+  A forma mais simples de mover USDC entre redes
+</div>
+
+<div class="grid">
 
 <!-- SWAP -->
 <div class="box">
-  <h3>Swap (mesma rede)</h3>
 
-  <p id="network">Rede: -</p>
-  <p id="ethBalance">ETH: -</p>
-  <p id="usdcBalance">USDC: -</p>
+<div class="sub-banner">
+  Convert ETH → USDC on Sepolia
+</div>
 
-  <button onclick="swap()">Swap ETH → USDC</button>
+<p id="eth">ETH: -</p>
+<p id="usdc">USDC: -</p>
 
-  <p class="info">Necessário USDC para bridge</p>
+<input placeholder="Quantidade ETH">
+
+<button onclick="swap()">Swap agora</button>
+
+<p class="info">Swap ocorre na Sepolia</p>
+
 </div>
 
 <!-- BRIDGE -->
 <div class="box">
-  <h3>Bridge</h3>
 
-  <div style="display:flex; gap:10px;">
-    <select id="from">
-      <option value="11155111">Sepolia</option>
-      <option value="5042002">ARC</option>
-    </select>
+<div class="sub-banner">
+  Bridge Sepolia → ARC Testnet (USDC)
+</div>
 
-    <button onclick="invert()">🔄</button>
+<p id="bridgeBalance">USDC: -</p>
 
-    <select id="to">
-      <option value="5042002">ARC</option>
-      <option value="11155111">Sepolia</option>
-    </select>
-  </div>
+<input id="amount" placeholder="Quantidade USDC">
 
-  <input id="amount" placeholder="Quantidade USDC">
+<input id="slippage" placeholder="Slippage % (ex: 0.5)">
 
-  <button onclick="handleBridge()" style="margin-top:15px;">
-    Bridge
-  </button>
+<div class="invert" onclick="invert()">🔄 Inverter direção</div>
 
-  <p class="info" id="hint"></p>
+<button onclick="bridge()">Bridge</button>
+
+<p class="info" id="hint"></p>
+
+</div>
+
 </div>
 
 </div>
@@ -149,44 +203,35 @@ input, select {
 
 <script>
 let provider, signer, user;
+let direction = "sepolia-arc";
 
 const USDC = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 
-const NETWORKS = {
-  11155111: {
-    name: "Sepolia",
-    chainId: "0xaa36a7",
-    rpc: "https://rpc.sepolia.org"
-  },
-  5042002: {
-    name: "ARC",
-    chainId: "0x4ce3ea",
-    rpc: "https://rpc.testnet.arc.network"
-  }
-};
-
-async function toggleWallet() {
+async function connect() {
   if (!window.ethereum) return alert("Instale MetaMask");
 
-  if (!user) {
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
-    user = await signer.getAddress();
-    document.getElementById("connectBtn").innerText = "Desconectar";
-    loadBalances();
-  } else {
-    user = null;
-    document.getElementById("connectBtn").innerText = "Conectar";
-  }
+  provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  signer = await provider.getSigner();
+  user = await signer.getAddress();
+
+  // assinatura (como vc pediu)
+  await signer.signMessage("Login ARC Bridge");
+
+  document.getElementById("btn").innerText = "Conectado";
+
+  load();
 }
 
-async function loadBalances() {
+async function load() {
   const net = await provider.getNetwork();
-  document.getElementById("network").innerText = "Rede: " + net.chainId;
+
+  document.getElementById("network").innerText =
+    net.chainId == 11155111 ? "Sepolia" : "ARC";
 
   const eth = await provider.getBalance(user);
-  document.getElementById("ethBalance").innerText =
+
+  document.getElementById("eth").innerText =
     "ETH: " + ethers.formatEther(eth);
 
   const usdc = new ethers.Contract(
@@ -196,57 +241,34 @@ async function loadBalances() {
   );
 
   const bal = await usdc.balanceOf(user);
-  let usdcFormatted = (bal / 1e6).toFixed(2);
+  const val = (bal / 1e6).toFixed(2);
 
-  document.getElementById("usdcBalance").innerText =
-    "USDC: " + usdcFormatted;
+  document.getElementById("usdc").innerText = "USDC: " + val;
+  document.getElementById("bridgeBalance").innerText = "USDC: " + val;
 
-  if (usdcFormatted == 0) {
+  if (val == 0) {
     document.getElementById("hint").innerText =
-      "Você precisa fazer swap de ETH para USDC antes da bridge";
+      "Faça swap de ETH → USDC primeiro";
   } else {
     document.getElementById("hint").innerText = "";
   }
-}
-
-function invert() {
-  let f = document.getElementById("from");
-  let t = document.getElementById("to");
-  let temp = f.value;
-  f.value = t.value;
-  t.value = temp;
 }
 
 function swap() {
   window.open("https://app.uniswap.org/#/swap?chain=sepolia");
 }
 
-async function switchNetwork(chainId) {
-  try {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: NETWORKS[chainId].chainId }]
-    });
-  } catch (e) {
-    await window.ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [{
-        chainId: NETWORKS[chainId].chainId,
-        chainName: NETWORKS[chainId].name,
-        rpcUrls: [NETWORKS[chainId].rpc],
-        nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }
-      }]
-    });
-  }
+function invert() {
+  direction = direction === "sepolia-arc" ? "arc-sepolia" : "sepolia-arc";
+
+  document.querySelector(".sub-banner:last-child").innerText =
+    direction === "sepolia-arc"
+      ? "Bridge Sepolia → ARC Testnet (USDC)"
+      : "Bridge ARC → Sepolia (USDC)";
 }
 
-async function handleBridge() {
-  let from = document.getElementById("from").value;
-  let to = document.getElementById("to").value;
-
-  await switchNetwork(from);
-
-  alert("Bridge real com Circle entra aqui 🔥");
+async function bridge() {
+  alert("Integração com Circle entra aqui 🔥");
 }
 </script>
 
