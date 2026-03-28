@@ -1,176 +1,105 @@
-<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ARC Bridge</title>
-    <meta
-      name="description"
-      content="Swap ETH to USDC on Sepolia and bridge USDC between Sepolia and Arc Testnet."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-  </head>
-  <body>
-    <div class="shell-bg"></div>
-    <header class="site-header">
-      <div class="header-inner wrap">
-        <a class="brand" href="#top" aria-label="ARC Bridge home">
-          <img src="./logo.webp" alt="ARC Bridge" class="brand-logo" />
-        </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sepolia ⇄ ARC Bridge</title>
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#070f1d;
+  color:#fff;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 20px;
+  align-items:center;
+}
+.banner{
+  height:100px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(90deg,#344566,#8b8e95);
+}
+.container{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  padding:20px;
+}
+.card{
+  background:#0f1a2e;
+  border-radius:12px;
+  padding:20px;
+  width:320px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+  border:none;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(90deg,#344566,#8b8e95);
+  color:#fff;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{
+  transform:scale(1.02);
+}
+.footer{
+  text-align:center;
+  padding:10px;
+  font-size:12px;
+}
+</style>
+</head>
+<body>
 
-        <div class="header-meta">
-          <div class="network-pill" id="networkPill">Rede não conectada</div>
-          <button class="ghost-btn" id="switchNetworkBtn" type="button">
-            Trocar rede
-          </button>
-          <button class="primary-btn" id="connectBtn" type="button">
-            Conectar carteira
-          </button>
-        </div>
-      </div>
-    </header>
+<header>
+  <div>LOGO</div>
+  <button>Connect Wallet</button>
+</header>
 
-    <main class="wrap" id="top">
-      <section class="hero">
-        <div class="hero-copy">
-          <span class="eyebrow">Crosschain made simple</span>
-          <h1>A primeira ponte premium para Arc Testnet.</h1>
-          <p>
-            Converta ETH para USDC na Sepolia e envie USDC entre
-            <strong>Ethereum Sepolia</strong> e <strong>Arc Testnet</strong>
-            com uma experiência limpa, rápida e direta.
-          </p>
-          <div class="hero-tags">
-            <span>Swap real onchain</span>
-            <span>Bridge real via CCTP</span>
-            <span>Somente USDC</span>
-          </div>
-        </div>
+<div class="banner">
+  Sepolia ⇄ ARC — Swap & Bridge
+</div>
 
-        <div class="hero-banner">
-          <img src="./banner-top.webp" alt="Banner do ARC Bridge" />
-        </div>
-      </section>
+<div class="container">
 
-      <section class="cards-grid">
-        <article class="card">
-          <div class="card-banner">
-            <img src="./banner-swap.webp" alt="Banner swap" />
-          </div>
+  <div class="card">
+    <h3>Swap (Sepolia)</h3>
+    <label>ETH</label>
+    <input placeholder="Amount">
+    <label>USDC</label>
+    <input placeholder="Estimated">
+    <button>Swap</button>
+  </div>
 
-          <div class="card-topline">Convert ETH to USDC on Sepolia</div>
+  <div class="card">
+    <h3>Bridge</h3>
+    <label>From (Sepolia USDC)</label>
+    <input placeholder="Amount">
+    <label>To (ARC USDC)</label>
+    <input placeholder="Estimated">
+    <button>Bridge</button>
+  </div>
 
-          <div class="status-stack">
-            <div class="status-row">
-              <span>Rede ativa</span>
-              <strong id="swapNetwork">—</strong>
-            </div>
-            <div class="status-row">
-              <span>Saldo ETH</span>
-              <strong id="ethBalance">—</strong>
-            </div>
-            <div class="status-row">
-              <span>Saldo USDC</span>
-              <strong id="sepoliaUsdcBalance">—</strong>
-            </div>
-          </div>
+</div>
 
-          <label class="field-label" for="swapAmount">Você paga</label>
-          <div class="token-field">
-            <input id="swapAmount" type="number" min="0" step="0.000001" placeholder="0.00" />
-            <div class="token-chip">ETH</div>
-          </div>
+<div class="footer">
+Developed by @Rubensbrandao1
+</div>
 
-          <label class="field-label" for="swapSlippage">Slippage</label>
-          <div class="slippage-row">
-            <input id="swapSlippage" type="number" min="0.1" step="0.1" value="0.5" />
-            <span>%</span>
-          </div>
-
-          <div class="quote-box">
-            <div>
-              <span class="quote-label">Você recebe</span>
-              <strong id="swapQuote">—</strong>
-            </div>
-            <button class="tiny-btn" id="refreshQuoteBtn" type="button">Atualizar</button>
-          </div>
-
-          <button class="primary-btn full" id="swapBtn" type="button">
-            Swap ETH → USDC
-          </button>
-
-          <p class="helper-text">
-            O swap usa Uniswap na Sepolia direto pelo seu wallet. Primeiro conecte,
-            assine a mensagem e deixe a carteira na Sepolia.
-          </p>
-          <div class="activity-log" id="swapLog"></div>
-        </article>
-
-        <article class="card">
-          <div class="card-banner">
-            <img src="./banner-bridge.webp" alt="Banner bridge" />
-          </div>
-
-          <div class="card-topline" id="bridgeDirectionLabel">
-            Bridge Sepolia → Arc Testnet (USDC)
-          </div>
-
-          <div class="status-stack">
-            <div class="status-row">
-              <span>Origem</span>
-              <strong id="fromNetworkLabel">Sepolia</strong>
-            </div>
-            <div class="status-row">
-              <span>Destino</span>
-              <strong id="toNetworkLabel">Arc Testnet</strong>
-            </div>
-            <div class="status-row">
-              <span>Saldo disponível</span>
-              <strong id="bridgeBalance">—</strong>
-            </div>
-            <div class="status-row">
-              <span>Gas no destino</span>
-              <strong id="destinationGasBalance">—</strong>
-            </div>
-          </div>
-
-          <label class="field-label" for="bridgeAmount">Quantidade USDC</label>
-          <div class="token-field">
-            <input id="bridgeAmount" type="number" min="0" step="0.000001" placeholder="0.00" />
-            <div class="token-chip">USDC</div>
-          </div>
-
-          <label class="field-label" for="bridgeSlippage">Slippage visual</label>
-          <div class="slippage-row">
-            <input id="bridgeSlippage" type="number" min="0.1" step="0.1" value="0.5" />
-            <span>%</span>
-          </div>
-
-          <button class="invert-btn" id="invertBtn" type="button">↕ Inverter direção</button>
-          <button class="primary-btn full" id="bridgeBtn" type="button">
-            Iniciar bridge
-          </button>
-
-          <p class="helper-text">
-            Bridge real via CCTP sandbox. Na Arc, o gas é pago em USDC nativo.
-          </p>
-          <div class="activity-log" id="bridgeLog"></div>
-        </article>
-      </section>
-    </main>
-
-    <footer class="site-footer wrap">
-      <span>Desenvolvido por</span>
-      <a href="https://x.com/Rubensbrandao1" target="_blank" rel="noreferrer">@Rubensbrandao1</a>
-    </footer>
-
-    <script src="./app.js"></script>
-  </body>
+</body>
 </html>
