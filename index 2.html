@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bridge UI</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#070f1d;
+  color:#fff;
+}
+
+.container {
+  max-width:1000px;
+  margin:auto;
+  padding:20px;
+}
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo {
+  height:40px;
+}
+
+.wallet-btn {
+  padding:10px 20px;
+  border-radius:20px;
+  background:linear-gradient(90deg,#344566,#8b8e95);
+  cursor:pointer;
+}
+
+.banner-top {
+  width:100%;
+  height:400px;
+  margin:20px auto;
+  background-size:cover;
+  border-radius:20px;
+}
+
+.row {
+  display:flex;
+  gap:20px;
+}
+
+.box {
+  flex:1;
+  background:#0e1629;
+  border-radius:20px;
+  padding:20px;
+}
+
+.box-banner {
+  width:100%;
+  height:150px;
+  background-size:cover;
+  border-radius:15px;
+  margin-bottom:15px;
+}
+
+.input {
+  width:100%;
+  padding:10px;
+  background:#000;
+  border:none;
+  color:#fff;
+  margin-top:10px;
+}
+
+.button {
+  margin-top:20px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:15px;
+  background:linear-gradient(90deg,#6a11cb,#2575fc);
+  color:#fff;
+  cursor:pointer;
+}
+
+.switch {
+  text-align:center;
+  font-size:24px;
+  cursor:pointer;
+}
+
+.address {
+  font-size:12px;
+  opacity:0.7;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+  <img class="logo" src="https://via.placeholder.com/120x40">
+  <div id="walletBtn" class="wallet-btn">Connect Wallet</div>
+</div>
+
+<div class="banner-top" style="background-image:url('https://via.placeholder.com/1050x400')"></div>
+
+<div class="row">
+
+<div class="box">
+  <div class="box-banner" style="background-image:url('https://via.placeholder.com/500x150')"></div>
+  <h3>Swap (Sepolia)</h3>
+  <div>ETH Balance: <span id="ethBalance">-</span></div>
+  <input id="ethInput" class="input" placeholder="ETH amount">
+  <button class="button">Swap ETH → USDC</button>
+</div>
+
+<div class="box">
+  <div class="box-banner" style="background-image:url('https://via.placeholder.com/500x150')"></div>
+  <h3>Bridge USDC</h3>
+  <div>USDC Sepolia: <span id="usdcSepolia">-</span></div>
+  <div>USDC ARC: <span id="usdcArc">-</span></div>
+  <div class="switch">⇅</div>
+  <input class="input" placeholder="Amount">
+  <button class="button">Bridge</button>
+</div>
+
+</div>
+
+<div id="address" class="address"></div>
+
+</div>
+
+<script>
+let provider;
+let signer;
+let address;
+
+const walletBtn = document.getElementById("walletBtn");
+
+walletBtn.onclick = async () => {
+  if (!window.ethereum) return alert("Install MetaMask");
+
+  if (!provider) {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    address = await signer.getAddress();
+
+    walletBtn.innerText = address.slice(0,6) + "..." + address.slice(-4);
+    document.getElementById("address").innerText = "Connected: " + address;
+
+    const balance = await provider.getBalance(address);
+    document.getElementById("ethBalance").innerText = ethers.formatEther(balance);
+  } else {
+    provider = null;
+    walletBtn.innerText = "Connect Wallet";
+    document.getElementById("address").innerText = "";
+  }
+}
+</script>
+
+</body>
+</html>
