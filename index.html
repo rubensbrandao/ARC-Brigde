@@ -1,276 +1,176 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARC Bridge</title>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARC Bridge</title>
+    <meta
+      name="description"
+      content="Swap ETH to USDC on Sepolia and bridge USDC between Sepolia and Arc Testnet."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="shell-bg"></div>
+    <header class="site-header">
+      <div class="header-inner wrap">
+        <a class="brand" href="#top" aria-label="ARC Bridge home">
+          <img src="./logo.webp" alt="ARC Bridge" class="brand-logo" />
+        </a>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+        <div class="header-meta">
+          <div class="network-pill" id="networkPill">Rede não conectada</div>
+          <button class="ghost-btn" id="switchNetworkBtn" type="button">
+            Trocar rede
+          </button>
+          <button class="primary-btn" id="connectBtn" type="button">
+            Conectar carteira
+          </button>
+        </div>
+      </div>
+    </header>
 
-<style>
-body {
-  margin:0;
-  font-family:Inter, Arial;
-  background:#070f1d;
-  color:white;
-}
+    <main class="wrap" id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Crosschain made simple</span>
+          <h1>A primeira ponte premium para Arc Testnet.</h1>
+          <p>
+            Converta ETH para USDC na Sepolia e envie USDC entre
+            <strong>Ethereum Sepolia</strong> e <strong>Arc Testnet</strong>
+            com uma experiência limpa, rápida e direta.
+          </p>
+          <div class="hero-tags">
+            <span>Swap real onchain</span>
+            <span>Bridge real via CCTP</span>
+            <span>Somente USDC</span>
+          </div>
+        </div>
 
-/* HEADER */
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px 30px;
-}
+        <div class="hero-banner">
+          <img src="./banner-top.webp" alt="Banner do ARC Bridge" />
+        </div>
+      </section>
 
-.logo { height:45px; }
+      <section class="cards-grid">
+        <article class="card">
+          <div class="card-banner">
+            <img src="./banner-swap.webp" alt="Banner swap" />
+          </div>
 
-/* NETWORK BADGE */
-.network {
-  font-size:14px;
-  opacity:0.8;
-}
+          <div class="card-topline">Convert ETH to USDC on Sepolia</div>
 
-/* BUTTON */
-button {
-  background:linear-gradient(90deg,#344566,#8b8e95);
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
-  transition:0.2s;
-}
+          <div class="status-stack">
+            <div class="status-row">
+              <span>Rede ativa</span>
+              <strong id="swapNetwork">—</strong>
+            </div>
+            <div class="status-row">
+              <span>Saldo ETH</span>
+              <strong id="ethBalance">—</strong>
+            </div>
+            <div class="status-row">
+              <span>Saldo USDC</span>
+              <strong id="sepoliaUsdcBalance">—</strong>
+            </div>
+          </div>
 
-button:hover {
-  transform:scale(1.05);
-  opacity:0.9;
-}
+          <label class="field-label" for="swapAmount">Você paga</label>
+          <div class="token-field">
+            <input id="swapAmount" type="number" min="0" step="0.000001" placeholder="0.00" />
+            <div class="token-chip">ETH</div>
+          </div>
 
-/* MAIN */
-.container {
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
-}
+          <label class="field-label" for="swapSlippage">Slippage</label>
+          <div class="slippage-row">
+            <input id="swapSlippage" type="number" min="0.1" step="0.1" value="0.5" />
+            <span>%</span>
+          </div>
 
-/* TOP BANNER */
-.top-banner {
-  height:70px;
-  border-radius:14px;
-  background:linear-gradient(90deg,#344566,#8b8e95);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:600;
-  margin-bottom:10px;
-}
+          <div class="quote-box">
+            <div>
+              <span class="quote-label">Você recebe</span>
+              <strong id="swapQuote">—</strong>
+            </div>
+            <button class="tiny-btn" id="refreshQuoteBtn" type="button">Atualizar</button>
+          </div>
 
-/* HEADLINE */
-.headline {
-  text-align:center;
-  font-size:20px;
-  margin-bottom:20px;
-  opacity:0.9;
-}
+          <button class="primary-btn full" id="swapBtn" type="button">
+            Swap ETH → USDC
+          </button>
 
-/* GRID */
-.grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
+          <p class="helper-text">
+            O swap usa Uniswap na Sepolia direto pelo seu wallet. Primeiro conecte,
+            assine a mensagem e deixe a carteira na Sepolia.
+          </p>
+          <div class="activity-log" id="swapLog"></div>
+        </article>
 
-/* BOX */
-.box {
-  background:#0d1628;
-  padding:20px;
-  border-radius:18px;
-}
+        <article class="card">
+          <div class="card-banner">
+            <img src="./banner-bridge.webp" alt="Banner bridge" />
+          </div>
 
-/* SUB BANNER */
-.sub-banner {
-  height:50px;
-  border-radius:10px;
-  background:#111c33;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:15px;
-  font-size:14px;
-}
+          <div class="card-topline" id="bridgeDirectionLabel">
+            Bridge Sepolia → Arc Testnet (USDC)
+          </div>
 
-/* INPUT */
-input {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:none;
-  background:#111c33;
-  color:white;
-}
+          <div class="status-stack">
+            <div class="status-row">
+              <span>Origem</span>
+              <strong id="fromNetworkLabel">Sepolia</strong>
+            </div>
+            <div class="status-row">
+              <span>Destino</span>
+              <strong id="toNetworkLabel">Arc Testnet</strong>
+            </div>
+            <div class="status-row">
+              <span>Saldo disponível</span>
+              <strong id="bridgeBalance">—</strong>
+            </div>
+            <div class="status-row">
+              <span>Gas no destino</span>
+              <strong id="destinationGasBalance">—</strong>
+            </div>
+          </div>
 
-/* INFO */
-.info {
-  font-size:13px;
-  opacity:0.6;
-  margin-top:8px;
-}
+          <label class="field-label" for="bridgeAmount">Quantidade USDC</label>
+          <div class="token-field">
+            <input id="bridgeAmount" type="number" min="0" step="0.000001" placeholder="0.00" />
+            <div class="token-chip">USDC</div>
+          </div>
 
-/* INVERT */
-.invert {
-  text-align:center;
-  margin:10px 0;
-  cursor:pointer;
-}
+          <label class="field-label" for="bridgeSlippage">Slippage visual</label>
+          <div class="slippage-row">
+            <input id="bridgeSlippage" type="number" min="0.1" step="0.1" value="0.5" />
+            <span>%</span>
+          </div>
 
-/* FOOTER */
-.footer {
-  text-align:center;
-  margin:30px;
-  opacity:0.6;
-}
-</style>
-</head>
+          <button class="invert-btn" id="invertBtn" type="button">↕ Inverter direção</button>
+          <button class="primary-btn full" id="bridgeBtn" type="button">
+            Iniciar bridge
+          </button>
 
-<body>
+          <p class="helper-text">
+            Bridge real via CCTP sandbox. Na Arc, o gas é pago em USDC nativo.
+          </p>
+          <div class="activity-log" id="bridgeLog"></div>
+        </article>
+      </section>
+    </main>
 
-<header>
-  <img src="logo.webp" class="logo">
-  <div class="network" id="network">Rede: -</div>
-  <button onclick="connect()" id="btn">Conectar</button>
-</header>
+    <footer class="site-footer wrap">
+      <span>Desenvolvido por</span>
+      <a href="https://x.com/Rubensbrandao1" target="_blank" rel="noreferrer">@Rubensbrandao1</a>
+    </footer>
 
-<div class="container">
-
-<div class="top-banner">
-  Conectando Sepolia ⇄ ARC Testnet sem limites
-</div>
-
-<div class="headline">
-  A forma mais simples de mover USDC entre redes
-</div>
-
-<div class="grid">
-
-<!-- SWAP -->
-<div class="box">
-
-<div class="sub-banner">
-  Convert ETH → USDC on Sepolia
-</div>
-
-<p id="eth">ETH: -</p>
-<p id="usdc">USDC: -</p>
-
-<input placeholder="Quantidade ETH">
-
-<button onclick="swap()">Swap agora</button>
-
-<p class="info">Swap ocorre na Sepolia</p>
-
-</div>
-
-<!-- BRIDGE -->
-<div class="box">
-
-<div class="sub-banner">
-  Bridge Sepolia → ARC Testnet (USDC)
-</div>
-
-<p id="bridgeBalance">USDC: -</p>
-
-<input id="amount" placeholder="Quantidade USDC">
-
-<input id="slippage" placeholder="Slippage % (ex: 0.5)">
-
-<div class="invert" onclick="invert()">🔄 Inverter direção</div>
-
-<button onclick="bridge()">Bridge</button>
-
-<p class="info" id="hint"></p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="footer">
-  Desenvolvido por <a href="https://x.com/Rubensbrandao1" target="_blank" style="color:white">@Rubensbrandao1</a>
-</div>
-
-<script>
-let provider, signer, user;
-let direction = "sepolia-arc";
-
-const USDC = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-
-async function connect() {
-  if (!window.ethereum) return alert("Instale MetaMask");
-
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = await provider.getSigner();
-  user = await signer.getAddress();
-
-  // assinatura (como vc pediu)
-  await signer.signMessage("Login ARC Bridge");
-
-  document.getElementById("btn").innerText = "Conectado";
-
-  load();
-}
-
-async function load() {
-  const net = await provider.getNetwork();
-
-  document.getElementById("network").innerText =
-    net.chainId == 11155111 ? "Sepolia" : "ARC";
-
-  const eth = await provider.getBalance(user);
-
-  document.getElementById("eth").innerText =
-    "ETH: " + ethers.formatEther(eth);
-
-  const usdc = new ethers.Contract(
-    USDC,
-    ["function balanceOf(address) view returns (uint256)"],
-    provider
-  );
-
-  const bal = await usdc.balanceOf(user);
-  const val = (bal / 1e6).toFixed(2);
-
-  document.getElementById("usdc").innerText = "USDC: " + val;
-  document.getElementById("bridgeBalance").innerText = "USDC: " + val;
-
-  if (val == 0) {
-    document.getElementById("hint").innerText =
-      "Faça swap de ETH → USDC primeiro";
-  } else {
-    document.getElementById("hint").innerText = "";
-  }
-}
-
-function swap() {
-  window.open("https://app.uniswap.org/#/swap?chain=sepolia");
-}
-
-function invert() {
-  direction = direction === "sepolia-arc" ? "arc-sepolia" : "sepolia-arc";
-
-  document.querySelector(".sub-banner:last-child").innerText =
-    direction === "sepolia-arc"
-      ? "Bridge Sepolia → ARC Testnet (USDC)"
-      : "Bridge ARC → Sepolia (USDC)";
-}
-
-async function bridge() {
-  alert("Integração com Circle entra aqui 🔥");
-}
-</script>
-
-</body>
+    <script src="./app.js"></script>
+  </body>
 </html>
